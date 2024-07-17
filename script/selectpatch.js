@@ -13,6 +13,4 @@ function goToIndex() {
     window.location.href = 'index.html';
 }
 
-// document.addEventListener('DOMContentLoaded', function() {
-//     loadPatch('patch020');
-// });
+
