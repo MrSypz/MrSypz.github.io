@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Processor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #fileInput { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>JSON Processor</h1>
+    <input type="file" id="fileInput" accept=".json">
+    <button onclick="processFile()">Process File</button>
+    <div id="downloadLink"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        async function processFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file to process.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const data = JSON.parse(event.target.result);
+                const itemDataMap = data.itemDataMap || {};
+
+                const zip = new JSZip();
+
+                Object.keys(itemDataMap).forEach(itemId => {
+                    const itemData = itemDataMap[itemId];
+                    const modifiedItemId = itemData.itemId.replace('minecraft:', '');
+                    delete itemData.itemId;
+
+                    zip.file(`${modifiedItemId}.json`, JSON.stringify(itemData, null, 4));
+                });
+
+                // Generate the ZIP file
+                zip.generateAsync({ type: 'blob' }).then(content => {
+                    const downloadLink = document.getElementById('downloadLink');
+                    downloadLink.innerHTML = ''; // Clear previous content
+
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(content);
+                    link.download = 'items.zip';
+                    link.textContent = 'Download ZIP file';
+                    link.style.display = 'block';
+
+                    downloadLink.appendChild(link);
+                });
+            };
+
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
